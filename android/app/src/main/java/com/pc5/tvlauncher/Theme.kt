@@ -84,6 +84,7 @@ object T {
     const val tRing = 4000
     const val tBgIn = 600
 
+    @OptIn(androidx.compose.ui.text.ExperimentalTextApi::class)
     val noto = FontFamily(
         Font(R.font.noto_sans, FontWeight.Light, variationSettings = FontVariation.Settings(FontVariation.weight(300))),
         Font(R.font.noto_sans, FontWeight.Normal, variationSettings = FontVariation.Settings(FontVariation.weight(400))),
