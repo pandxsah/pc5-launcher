@@ -6,7 +6,7 @@ plugins {
 // The PC5 web UI (app/web) is copied unchanged into the APK, so the theme is pixel-identical.
 val copyWebUi by tasks.registering(Sync::class) {
     from(rootProject.file("../app/web"))
-    into(layout.buildDirectory.dir("generated/pc5assets/web"))
+    into(layout.buildDirectory.dir("generated/pc5assets"))
 }
 
 android {
