@@ -30,6 +30,30 @@ class MainActivity : Activity() {
 
     private val shim = """
         (function () {
+          // Polyfills for older Android TV WebViews (Chrome < 98)
+          if (typeof window.structuredClone !== "function") {
+            window.structuredClone = function (v) { return v === undefined ? undefined : JSON.parse(JSON.stringify(v)); };
+          }
+          if (!Object.hasOwn) Object.hasOwn = function (o, k) { return Object.prototype.hasOwnProperty.call(o, k); };
+          if (!Array.prototype.at) Array.prototype.at = function (i) { i = Math.trunc(i) || 0; if (i < 0) i += this.length; return this[i]; };
+          // Show startup errors on the TV itself
+          function showErr(msg) {
+            try {
+              var d = document.getElementById("pc5-err");
+              if (!d) {
+                d = document.createElement("pre"); d.id = "pc5-err";
+                d.style.cssText = "position:fixed;left:24px;right:24px;bottom:24px;max-height:45vh;overflow:auto;z-index:2147483647;" +
+                  "background:rgba(120,0,0,.92);color:#fff;font:14px/1.4 monospace;padding:12px;border-radius:8px;white-space:pre-wrap";
+                (document.body || document.documentElement).appendChild(d);
+              }
+              d.textContent += msg + "\n";
+            } catch (e) {}
+          }
+          window.addEventListener("error", function (e) { showErr("Error: " + e.message + " @ " + (e.filename || "") + ":" + (e.lineno || "")); });
+          window.addEventListener("unhandledrejection", function (e) { var r = e.reason; showErr("Promise: " + (r && (r.stack || r.message) || r)); });
+          setTimeout(function () {
+            if (!window.__couchReady) showErr("UI did not finish starting (WebView " + navigator.userAgent.replace(/.*Chrome\/([0-9.]+).*/, "Chrome $1") + ")");
+          }, 8000);
           if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.couch) return;
           var seq = 0, pending = {};
           window.__couchReply = function (id, raw) {
@@ -78,6 +102,16 @@ class MainActivity : Activity() {
             override fun onPageStarted(view: WebView, url: String?, favicon: android.graphics.Bitmap?) {
                 // Fallback for old WebViews without document-start scripts
                 if (!WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) view.evaluateJavascript(shim, null)
+            }
+        }
+        web.webChromeClient = object : android.webkit.WebChromeClient() {
+            // Hide WebView's grey "play" placeholder on <video> elements without a poster
+            override fun getDefaultVideoPoster(): android.graphics.Bitmap =
+                android.graphics.Bitmap.createBitmap(1, 1, android.graphics.Bitmap.Config.ARGB_8888)
+
+            override fun onConsoleMessage(m: android.webkit.ConsoleMessage): Boolean {
+                android.util.Log.i("PC5", "[console] ${m.message()} @ ${m.sourceId()}:${m.lineNumber()}")
+                return true
             }
         }
         web.loadUrl("https://appassets.androidplatform.net/web/index.html?role=home")
