@@ -6,7 +6,6 @@
 
     <!-- Needed on Android 11+ to see every installed app -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
-    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:label="PC5 Launcher"

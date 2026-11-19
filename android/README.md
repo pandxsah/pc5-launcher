@@ -1,29 +1,20 @@
-# PC5 Launcher – Android TV
+# PC5 Launcher – Android TV (native)
 
-Runs the **unchanged** PC5 web UI (`../app/web`) inside an Android TV home-screen app, so the theme is identical.
-The Python core is replaced by `Backend.kt`, which lists your installed Android apps and launches them.
+A native Android TV home screen (Kotlin + Jetpack Compose) with the PC5 Launcher look: same colours, Noto Sans,
+tile row geometry, focus ring, hub layout, timings and UI sounds, taken from `app/web/css/tokens.css`. No WebView.
 
-## Build
-1. Keep this `android/` folder inside the pc5-launcher repo (the build copies `../app/web` into the APK).
-2. Open `android/` in Android Studio (Ladybug or newer, JDK 17) and let Gradle sync.
-3. Build › Build APK(s) → `app/build/outputs/apk/debug/app-debug.apk`.
-
-## Install on the TV
+## Install
 ```
-adb connect <tv-ip>
-adb install -r app-debug.apk
-# make it the home screen (Google TV / Android TV 12+ need this; older boxes show a chooser on HOME)
+adb connect <TV-IP>:5555
+curl -L -o pc5.apk https://github.com/pandxsah/pc5-launcher/releases/download/tv-latest/pc5-tv-launcher.apk
+adb install -r pc5.apk
 adb shell cmd package set-home-activity com.pc5.tvlauncher/.MainActivity
 ```
-To undo: `adb shell pm disable-user --user 0 com.pc5.tvlauncher`, or uninstall it.
+Every push to `android-tv` rebuilds the APK (GitHub Actions) and replaces the release file.
 
-## What works
-- Home screen, Library, focus ring, sounds, fonts, backgrounds: the original HTML/CSS/JS
-- Games row = apps Android marks as games; Apps row = everything else
-- Real app icons and TV banners, launching, "recently played" order, move/hide tiles, rename/favourite
-- Remote and gamepad: D-pad, OK/A = cross, Back/B = circle, X, Y, Menu/Start = options, L1/R1, L2/R2
-- HOME button jumps back to the PC5 home
+## Controls
+- Left/Right: move along the row · Down: hub (Play/Open, ⋯ app info) · Up: tabs, Settings, Power
+- OK / A: open · Back / B: back · Menu / Start: app info · L1 / R1: Games / Apps tab
+- HOME while on the launcher: jump to the first tile
 
-## Not available on Android
-Steam/GOG/Epic stores, installer, Proton, file explorer, gallery, trophies, Discord, system power options.
-Those tiles are hidden by default. Calls they make return null and are logged under `adb logcat -s PC5`.
+Games row = apps Android marks as games; Apps = everything else. Order: last opened or installed first.
