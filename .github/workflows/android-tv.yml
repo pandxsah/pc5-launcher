@@ -24,5 +24,5 @@ jobs:
         run: |
           cp android/app/build/outputs/apk/debug/app-debug.apk pc5-tv-launcher.apk
           gh release delete tv-latest -y --cleanup-tag || true
-          gh release create tv-latest pc5-tv-launcher.apk --target "$GITHUB_SHA" --prerelease \
+          gh release create tv-latest pc5-tv-launcher.apk --target "$GITHUB_SHA" --latest \
             --title "PC5 Android TV (latest build)" --notes "Debug build of the Android TV port from branch android-tv."
