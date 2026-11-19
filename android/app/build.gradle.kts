@@ -19,10 +19,20 @@ android {
         versionCode = 1
         versionName = "0.5.1-tv"
     }
+    // Fixed key so every CI build can update the previous install (adb install -r)
+    signingConfigs {
+        create("pc5") {
+            storeFile = rootProject.file("pc5-tv.keystore")
+            storePassword = "pc5launcher"
+            keyAlias = "pc5"
+            keyPassword = "pc5launcher"
+        }
+    }
     buildTypes {
+        debug { signingConfig = signingConfigs.getByName("pc5") }
         release {
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("debug") // replace with your own key for distribution
+            signingConfig = signingConfigs.getByName("pc5")
         }
     }
     sourceSets["main"].assets.srcDir(layout.buildDirectory.dir("generated/pc5assets"))
